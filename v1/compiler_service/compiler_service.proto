@@ -2,12 +2,12 @@ syntax = "proto3";
 
 package ru.nstu.isma.contracts.v1.compiler_service;
 
-import "v1/services/compiler_service/messages/compile_request.proto";
-import "v1/services/compiler_service/messages/compile_response.proto";
-import "v1/services/compiler_service/messages/validate_request.proto";
-import "v1/services/compiler_service/messages/delete_compiled_model_request.proto";
-import "v1/services/compiler_service/messages/highlight_request.proto";
-import "v1/services/compiler_service/messages/highlight_response.proto";
+import "v1/compiler_service/messages/compile_request.proto";
+import "v1/compiler_service/messages/compile_response.proto";
+import "v1/compiler_service/messages/validate_request.proto";
+import "v1/compiler_service/messages/delete_compiled_model_request.proto";
+import "v1/compiler_service/messages/highlight_request.proto";
+import "v1/compiler_service/messages/highlight_response.proto";
 
 option csharp_namespace = "Isma.Contracts.V1.CompilerService";
 option go_package = "github.com/isma/contracts/v1/compiler_service";

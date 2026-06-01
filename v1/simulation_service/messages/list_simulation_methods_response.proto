@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package ru.nstu.isma.contracts.v1.simulation_service;
 
-import "v1/services/simulation_service/messages/simulation_method_item.proto";
+import "v1/simulation_service/messages/simulation_method_item.proto";
 
 option csharp_namespace = "Isma.Contracts.V1.SimulationService";
 option go_package = "github.com/isma/contracts/v1/simulation_service";

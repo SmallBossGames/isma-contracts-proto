@@ -2,16 +2,16 @@ syntax = "proto3";
 
 package ru.nstu.isma.contracts.v1.simulation_service;
 
-import "v1/services/simulation_service/messages/cancel_simulation_request.proto";
-import "v1/services/simulation_service/messages/cancel_simulation_response.proto";
-import "v1/services/simulation_service/messages/get_simulation_result_request.proto";
-import "v1/services/simulation_service/messages/get_simulation_result_response.proto";
-import "v1/services/simulation_service/messages/list_simulation_methods_request.proto";
-import "v1/services/simulation_service/messages/list_simulation_methods_response.proto";
-import "v1/services/simulation_service/messages/monitor_simulation_request.proto";
-import "v1/services/simulation_service/messages/monitor_simulation_response.proto";
-import "v1/services/simulation_service/messages/run_simulation_request.proto";
-import "v1/services/simulation_service/messages/run_simulation_response.proto";
+import "v1/simulation_service/messages/cancel_simulation_request.proto";
+import "v1/simulation_service/messages/cancel_simulation_response.proto";
+import "v1/simulation_service/messages/get_simulation_result_request.proto";
+import "v1/simulation_service/messages/get_simulation_result_response.proto";
+import "v1/simulation_service/messages/list_simulation_methods_request.proto";
+import "v1/simulation_service/messages/list_simulation_methods_response.proto";
+import "v1/simulation_service/messages/monitor_simulation_request.proto";
+import "v1/simulation_service/messages/monitor_simulation_response.proto";
+import "v1/simulation_service/messages/run_simulation_request.proto";
+import "v1/simulation_service/messages/run_simulation_response.proto";
 
 option csharp_namespace = "Isma.Contracts.V1.SimulationService";
 option go_package = "github.com/isma/contracts/v1/simulation_service";
