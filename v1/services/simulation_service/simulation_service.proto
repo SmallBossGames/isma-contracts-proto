@@ -2,16 +2,16 @@ syntax = "proto3";
 
 package ru.nstu.isma.contracts.simulation;
 
-import "simulation/cancel_simulation_request.proto";
-import "simulation/cancel_simulation_response.proto";
-import "simulation/get_simulation_result_request.proto";
-import "simulation/get_simulation_result_response.proto";
-import "simulation/list_simulation_methods_request.proto";
-import "simulation/list_simulation_methods_response.proto";
-import "simulation/monitor_simulation_request.proto";
-import "simulation/monitor_simulation_response.proto";
-import "simulation/run_simulation_request.proto";
-import "simulation/run_simulation_response.proto";
+import "v1/services/simulation_service/messages/cancel_simulation_request.proto";
+import "v1/services/simulation_service/messages/cancel_simulation_response.proto";
+import "v1/services/simulation_service/messages/get_simulation_result_request.proto";
+import "v1/services/simulation_service/messages/get_simulation_result_response.proto";
+import "v1/services/simulation_service/messages/list_simulation_methods_request.proto";
+import "v1/services/simulation_service/messages/list_simulation_methods_response.proto";
+import "v1/services/simulation_service/messages/monitor_simulation_request.proto";
+import "v1/services/simulation_service/messages/monitor_simulation_response.proto";
+import "v1/services/simulation_service/messages/run_simulation_request.proto";
+import "v1/services/simulation_service/messages/run_simulation_response.proto";
 
 option csharp_namespace = "Isma.Contracts.Simulation";
 option go_package = "github.com/isma/contracts/simulation";
