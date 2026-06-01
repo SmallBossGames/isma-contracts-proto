@@ -8,9 +8,18 @@ option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
- * Response containing simulation ID after successful start.
+ * Response to RunSimulation request.
+ * 
+ * Returned immediately after the simulation is accepted for execution.
+ * The simulation runs asynchronously on the server.
+ * 
+ * Use the simulation_id to:
+ *   - Monitor progress via MonitorSimulation
+ *   - Retrieve results via GetSimulationResult
+ *   - Cancel execution via CancelSimulation
  */
 message RunSimulationResponse {
-  // Unique identifier for tracking this simulation
+  // Auto-incremented unique identifier for this simulation.
+  // Use this ID for all subsequent operations on this simulation.
   int64 simulation_id = 1;
 }

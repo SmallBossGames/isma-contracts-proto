@@ -7,10 +7,30 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * Request to delete a previously compiled model from the in-memory store.
+ * 
+ * Use this to free memory when a compiled model is no longer needed,
+ * such as when the user closes a project or switches to a different model.
+ * 
+ * The model must have been previously compiled via LismaCompilerService.Compile.
+ * 
+ * If the compiled_model_id does not exist in the store, the response
+ * returns success = false (no gRPC error is raised).
+ */
 message DeleteCompiledModelRequest {
+  // UUID of the compiled model to delete.
+  // Obtained from CompileResponse.compiled_model_id.
   string compiled_model_id = 1;
 }
 
+/* 
+ * Response to Delete request.
+ * 
+ * Indicates whether the specified compiled model was found and removed.
+ */
 message DeleteCompiledModelResponse {
+  // True if the model was found and deleted.
+  // False if the model ID was not found in the store.
   bool success = 1;
 }

@@ -7,5 +7,15 @@ option go_package = "github.com/isma/contracts/v1/simulation_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
+/* 
+ * Response to CancelSimulation request.
+ * 
+ * This is an empty response — the operation is either successful or
+ * returns a gRPC error (NOT_FOUND or FAILED_PRECONDITION).
+ * 
+ * A successful cancellation means:
+ *   - The simulation session status has been set to CANCELLED
+ *   - The running simulation will halt on its next integration step
+ */
 message CancelSimulationResponse {
 }

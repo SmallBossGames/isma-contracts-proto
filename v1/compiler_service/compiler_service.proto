@@ -14,9 +14,81 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * LISMA Compiler Service
+ * 
+ * Provides compilation, validation, and lexical analysis for LISMA source code.
+ * LISMA is the domain-specific language used to define hybrid system models (HSM)
+ * in the ISMA simulation platform.
+ * 
+ * Compilation pipeline:
+ *   LISMA source → HSM model (via LismaTranslator)
+ *                  ↓
+ *              If PDE model → FDMConverter → finite difference discretization
+ *                  ↓
+ *              Stored in CompiledModelStore (in-memory) → returns UUID
+ * 
+ * Error mapping (server-side):
+ *   - Blank source code → gRPC INVALID_ARGUMENT
+ *   - IllegalArgumentException → gRPC NOT_FOUND
+ *   - IllegalStateException → gRPC FAILED_PRECONDITION
+ *   - Other Exception → gRPC INTERNAL
+ * 
+ * Typical workflow:
+ *   1. Use Highlight for real-time syntax highlighting in the editor
+ *   2. Use Validate to check for errors without storing the model
+ *   3. Use Compile to produce a stored model ready for simulation
+ *   4. Use Delete to free memory when the model is no longer needed
+ */
 service LismaCompilerService {
+  /*
+   * Translates LISMA source code to a compiled HSM model.
+   * 
+   * The model is stored in-memory and a persistent UUID is returned.
+   * The compiled_model_id is required as input to RunSimulation.
+   * 
+   * On success: compiled_model_id is a non-empty UUID string.
+   * On failure: compiled_model_id is empty; errors list contains details.
+   * 
+   * Warnings are advisory messages that do not prevent simulation.
+   */
   rpc Compile(CompileRequest) returns (CompileResponse);
+  
+  /*
+   * Validates LISMA source code without producing a compiled model.
+   * 
+   * Runs the translator in validation mode (populates IsmaErrorList) but
+   * does not store the model. Use this for quick syntax/semantic checks
+   * before committing to a full compilation.
+   * 
+   * Returns the same error/warning format as Compile but with no model ID.
+   */
   rpc Validate(ValidateRequest) returns (ValidateResponse);
+  
+  /*
+   * Removes a previously compiled model from the in-memory store.
+   * 
+   * Frees memory associated with the HSM model. This is useful when the
+   * user closes a project or when memory pressure requires cleanup.
+   * 
+   * Returns success = false if the model ID was not found in the store.
+   */
   rpc Delete(DeleteCompiledModelRequest) returns (DeleteCompiledModelResponse);
+  
+  /*
+   * Performs lexical analysis on LISMA source code, returning syntax tokens
+   * for IDE highlighting (syntax highlighting, bracket matching, etc.).
+   * 
+   * Uses ANTLR4 LismaLexer to tokenize source code. Only keywords, comments,
+   * and number literals are returned; other token types are filtered out.
+   * 
+   * Empty input returns an empty token list (no error).
+   * 
+   * Token kinds:
+   *   KEYWORD  — LISMA keywords: const, state, for, if, else, from, macro, set
+   *   COMMENT  — Single-line and block comments
+   *   NUMBER   — Floating-point and decimal literals
+   *   TEXT     — Reserved, never produced by the handler
+   */
   rpc Highlight(HighlightRequest) returns (HighlightResponse);
 }

@@ -10,9 +10,21 @@ option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
- * Response containing list of available integration methods.
+ * Response containing the list of available numerical integration methods.
+ * 
+ * Each method includes:
+ *   - name: Machine-readable identifier (use in RunSimulationRequest.method_name)
+ *   - title: Human-readable display name (use in UI dropdowns)
+ * 
+ * Standard methods available:
+ *   euler       — Forward Euler method (first-order)
+ *   rk2         — Runge-Kutta 2nd order
+ *   rk3         — Runge-Kutta 3rd order
+ *   rk31        — Runge-Kutta 3(1) embedded pair (adaptive)
+ *   rkmerson    — Merson's method (five-stage Runge-Kutta)
+ *   rkfehlberg  — Runge-Kutta-Fehlberg RKF45 (adaptive, order 4/5)
  */
 message ListSimulationMethodsResponse {
-  // List of available methods
+  // List of available integration methods.
   repeated SimulationMethodItem methods = 1;
 }

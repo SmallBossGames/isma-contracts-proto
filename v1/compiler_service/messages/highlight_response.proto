@@ -7,20 +7,66 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * Token category — classifies syntax tokens produced by lexical analysis.
+ * 
+ * Used in HighlightResponse to determine how to style each token in the editor.
+ * 
+ * Token types produced by the server:
+ *   KEYWORD  — LISMA language keywords
+ *   COMMENT  — Source code comments (single-line or block)
+ *   NUMBER   — Numeric literals (floating-point and decimal)
+ * 
+ * Reserved/unused:
+ *   TEXT     — Defined in the enum but never produced by the handler
+ *   UNSPECIFIED — Default/unset value
+ */
 enum TokenKind {
+  // Unspecified/default value — should not appear in valid responses.
   TOKEN_KIND_UNSPECIFIED = 0;
+  
+  // LISMA language keywords: const, state, for, if, else, from, macro, set
   TOKEN_KIND_KEYWORD = 1;
+  
+  // Single-line (//) and block (/* */) comments
   TOKEN_KIND_COMMENT = 2;
+  
+  // Floating-point and decimal numeric literals (e.g., 3.14, 0.1, 1e-5)
   TOKEN_KIND_NUMBER = 3;
+  
+  // Reserved — never produced by the handler (tokens of other types are filtered)
   TOKEN_KIND_TEXT = 4;
 }
 
+/* 
+ * A single syntax token with position and category information.
+ * 
+ * Used by IDEs to apply syntax highlighting to LISMA source code.
+ * The start and length fields define the token's position within the
+ * original source code (character offsets, 0-based).
+ */
 message SyntaxToken {
+  // Character offset in source code where this token starts (0-based).
   int32 start = 1;
+  
+  // Length of the token in characters.
   int32 length = 2;
+  
+  // Category of this token — determines how it should be styled in the editor.
   TokenKind kind = 3;
 }
 
+/* 
+ * Response to Highlight request — list of syntax tokens for source code.
+ * 
+ * Tokens are ordered by their position in the source code (increasing start offset).
+ * Use the start and length fields to map each token to its position in the source,
+ * and the kind field to determine the appropriate syntax highlighting style.
+ * 
+ * Empty response (empty tokens list) is valid — it occurs when the input source
+ * code is empty or contains no recognizable tokens.
+ */
 message HighlightResponse {
+  // Ordered list of syntax tokens.
   repeated SyntaxToken tokens = 1;
 }

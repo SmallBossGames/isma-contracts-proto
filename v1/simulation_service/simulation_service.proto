@@ -20,19 +20,91 @@ option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
  * ISMA Simulation Service
- *
- * Provides RPCs for running numerical simulations, retrieving results,
- * monitoring progress, and listing available integration methods.
+ * 
+ * Manages the lifecycle of numerical simulations for hybrid system models (HSM).
+ * Simulations solve systems of differential-algebraic equations using numerical
+ * integration methods (Euler, Runge-Kutta variants).
+ * 
+ * Workflow:
+ * 1. Compile a LISMA model via LismaCompilerService.Compile to obtain compiled_model_id
+ * 2. Call RunSimulation with the compiled_model_id and integration parameters
+ * 3. Optionally monitor progress via MonitorSimulation (server-streaming)
+ * 4. Retrieve results via GetSimulationResult (returns HTTP download URL)
+ * 5. Cancel a running simulation via CancelSimulation if needed
+ * 
+ * Error mapping (server-side):
+ * - IllegalArgumentException → gRPC NOT_FOUND (model/session not found)
+ * - IllegalStateException → gRPC FAILED_PRECONDITION (invalid state transition)
+ * - Other Exception → gRPC INTERNAL (unexpected server error)
  */
 service SimulationService {
-  // Starts a simulation, returns simulation ID
+  /*
+   * Starts a numerical simulation asynchronously.
+   * 
+   * The model must first be compiled via LismaCompilerService.Compile.
+   * The server validates the compiled_model_id exists in its in-memory store
+   * before starting the simulation. Returns immediately with a simulation_id
+   * that can be used for monitoring and result retrieval.
+   * 
+   * Available integration methods (query via ListSimulationMethods):
+   *   euler       — Forward Euler method
+   *   rk2         — Runge-Kutta 2nd order
+   *   rk3         — Runge-Kutta 3rd order
+   *   rk31        — Runge-Kutta 3(1) embedded pair
+   *   rkmerson    — Merson's method
+   *   rkfehlberg  — Runge-Kutta-Fehlberg (RKF45)
+   * 
+   * Optional configurations:
+   *   - accuracy_config: Enables adaptive step size control (precision tuning)
+   *   - stability_config: Enables stability control for RK methods (prevents divergence)
+   *   - event_detection: Enables zero-crossing detection for hybrid systems
+   */
   rpc RunSimulation(RunSimulationRequest) returns (RunSimulationResponse);
-  // Retrieves completed simulation results
+  
+  /*
+   * Returns the download URL for a completed simulation's result file.
+   * 
+   * The download URL is served by the embedded Ktor HTTP server on a separate
+   * Unix socket. The actual binary file download uses HTTP, not gRPC.
+   * 
+   * Returns a relative path: /simulation/{simulationId}/download
+   */
   rpc GetSimulationResult(GetSimulationResultRequest) returns (GetSimulationResultResponse);
-  // Streams progress updates for a running simulation
+  
+  /*
+   * Streams progress updates for a running simulation.
+   * 
+   * Server-side polling: The handler polls the session store every 100ms on the
+   * gRPC thread. Reports are sent when:
+   *   1. The simulation advances by at least (accuracy * timeRange) time units
+   *      since the last report, or
+   *   2. The simulation reaches a terminal state (COMPLETED, FAILED, CANCELLED)
+   * 
+   * With accuracy = 0.0, only the final status is reported.
+   * With accuracy = 0.1 on a 10-second simulation, reports come ~every 1 second.
+   * 
+   * The stream ends when the simulation reaches a terminal state.
+   */
   rpc MonitorSimulation(MonitorSimulationRequest) returns (stream MonitorSimulationResponse);
-  // Lists available integration methods
+  
+  /*
+   * Lists all available numerical integration methods discovered at startup.
+   * 
+   * Methods are loaded via Java ServiceLoader scanning for IIntegrationMethodFactory
+   * implementations. The response includes both machine-readable names (for use in
+   * RunSimulation) and human-readable titles (for UI display).
+   */
   rpc ListSimulationMethods(ListSimulationMethodsRequest) returns (ListSimulationMethodsResponse);
-  // Cancels a running simulation
+  
+  /*
+   * Cancels a running simulation.
+   * 
+   * Sets the session status to CANCELLED. The running simulation checks this
+   * status on each step and throws InterruptedException to halt execution.
+   * 
+   * Error cases:
+   *   - Simulation not found → gRPC NOT_FOUND
+   *   - Simulation not in RUNNING state → gRPC FAILED_PRECONDITION
+   */
   rpc CancelSimulation(CancelSimulationRequest) returns (CancelSimulationResponse);
 }

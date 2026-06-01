@@ -7,14 +7,49 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * Response to Compile request.
+ * 
+ * Contains the compiled model ID (on success) or error/warning details (on failure).
+ * 
+ * On successful compilation:
+ *   - compiled_model_id: Non-empty UUID string (use in RunSimulationRequest)
+ *   - errors: Empty list
+ *   - warnings: May contain advisory messages (do not prevent simulation)
+ * 
+ * On failed compilation:
+ *   - compiled_model_id: Empty string
+ *   - errors: List of CompilationError with line/column positions
+ *   - warnings: May contain advisory messages
+ */
 message CompileResponse {
+  // UUID for the compiled model — empty string if compilation failed.
+  // This ID is required as input to RunSimulationRequest.
   string compiled_model_id = 1;
+  
+  // List of compilation errors with line and column positions.
+  // Empty if compilation succeeded.
   repeated CompilationError errors = 2;
+  
+  // List of warning messages — advisory only, do not prevent simulation.
   repeated string warnings = 3;
 }
 
+/* 
+ * Represents a single compilation error with location information.
+ * 
+ * Errors are produced during LISMA source code translation and contain
+ * the approximate line and column position in the source file where
+ * the error was detected.
+ */
 message CompilationError {
+  // Line number (1-based) where the error was detected in the source code.
   int32 row = 1;
+  
+  // Column number (1-based) where the error was detected in the source code.
   int32 column = 2;
+  
+  // Human-readable error description.
+  // Examples: "Undefined variable 'x'", "Syntax error near 'for'", "Type mismatch"
   string message = 3;
 }

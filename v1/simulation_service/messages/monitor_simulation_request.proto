@@ -9,11 +9,28 @@ option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
  * Request to monitor simulation progress.
+ * 
+ * Establishes a server-streaming RPC that delivers periodic progress updates
+ * as the simulation advances through its time range.
+ * 
+ * The accuracy parameter controls report granularity:
+ *   - accuracy = 0.0: Only the final status is reported
+ *   - accuracy = 0.1: Reports every ~10% of simulation time
+ *   - accuracy = 0.01: Reports every ~1% of simulation time
+ * 
+ * Reports are sent when the simulation advances by (accuracy * timeRange)
+ * time units since the last report, or when the simulation reaches a
+ * terminal state (COMPLETED, FAILED, CANCELLED).
+ * 
+ * Server polls the session store every 100ms on the gRPC thread.
  */
 message MonitorSimulationRequest {
-  // ID returned from RunSimulation
+  // ID of the simulation to monitor, returned from RunSimulationResponse.
   int64 simulation_id = 1;
+  
   // Accuracy threshold in [0.0, 1.0] — report progress when time advances by
-  // this fraction of total simulation range. Last value always reported.
+  // this fraction of total simulation range (end_time - start_time).
+  // Last value is always reported regardless of accuracy setting.
+  // Example: accuracy=0.1 on a 10s simulation → reports every ~1s of simulated time.
   double accuracy = 2;
 }

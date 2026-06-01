@@ -7,6 +7,28 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * Request to compile LISMA source code into a compiled HSM model.
+ * 
+ * LISMA (Language for Integrated Simulation Modeling and Analysis) is the
+ * domain-specific language used to define hybrid system models in ISMA.
+ * 
+ * Compilation pipeline:
+ *   1. LISMA source → HSM model (via LismaTranslator)
+ *   2. If PDE model → FDMConverter → finite difference discretization
+ *   3. Store in CompiledModelStore (in-memory) → return UUID
+ * 
+ * On success: compiled_model_id is a non-empty UUID string.
+ * On failure: compiled_model_id is empty; errors list contains details.
+ * 
+ * Validation (blank input):
+ *   - Empty or whitespace-only source code → gRPC INVALID_ARGUMENT
+ * 
+ * The compiled_model_id is required as input to RunSimulationRequest.
+ */
 message CompileRequest {
+  // Full LISMA source code text to compile.
+  // Must not be empty or whitespace-only.
+  // Examples: state definitions, equations, transitions, constraints.
   string lisma_source_code = 1;
 }

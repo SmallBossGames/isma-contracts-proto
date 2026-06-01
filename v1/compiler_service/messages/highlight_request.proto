@@ -7,6 +7,24 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * Request to perform lexical analysis on LISMA source code.
+ * 
+ * The server tokenizes the source code using ANTLR4 LismaLexer and returns
+ * syntax tokens for IDE highlighting (syntax highlighting, bracket matching,
+ * keyword recognition, etc.).
+ * 
+ * Only three token types are returned:
+ *   KEYWORD  — LISMA keywords: const, state, for, if, else, from, macro, set
+ *   COMMENT  — Single-line and block comments
+ *   NUMBER   — Floating-point and decimal literals
+ * 
+ * Other token types (identifiers, operators, etc.) are filtered out by
+ * the server-side handler.
+ * 
+ * Empty input returns an empty token list (no error).
+ */
 message HighlightRequest {
+  // Source code text to tokenize for syntax highlighting.
   string source_code = 1;
 }

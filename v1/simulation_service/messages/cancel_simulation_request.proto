@@ -7,6 +7,23 @@ option go_package = "github.com/isma/contracts/v1/simulation_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
+/* 
+ * Request to cancel a running simulation.
+ * 
+ * Sending this request sets the simulation session status to CANCELLED.
+ * The running simulation checks this status on each integration step
+ * and throws InterruptedException to halt execution.
+ * 
+ * Error cases:
+ *   - simulation_id not found → gRPC NOT_FOUND
+ *   - simulation not in RUNNING state → gRPC FAILED_PRECONDITION
+ * 
+ * After cancellation:
+ *   - No result file is produced or cached
+ *   - The task is removed from the "In progress" section of the UI
+ *   - MonitorSimulation stream ends with terminal status
+ */
 message CancelSimulationRequest {
+  // ID of the simulation to cancel, returned from RunSimulationResponse.
   int64 simulation_id = 1;
 }

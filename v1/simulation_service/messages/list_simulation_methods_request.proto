@@ -8,6 +8,13 @@ option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
- * Request to list all available integration methods.
+ * Request to list all available numerical integration methods.
+ * 
+ * This is an empty request — no parameters needed. The server returns
+ * all methods discovered at startup via Java ServiceLoader scanning
+ * for IIntegrationMethodFactory implementations.
+ * 
+ * Use the method names in this list as the method_name parameter
+ * in RunSimulationRequest.
  */
 message ListSimulationMethodsRequest {}

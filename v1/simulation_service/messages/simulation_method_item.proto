@@ -8,11 +8,27 @@ option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
- * Describes a single numerical integration method.
+ * Describes a single numerical integration method available for simulation.
+ * 
+ * Each method has:
+ *   - name: Machine-readable identifier (e.g., "euler", "rk2") — used in API calls
+ *   - title: Human-readable display name (e.g., "Euler", "Runge-Kutta 2nd order") — used in UI
+ * 
+ * Methods are discovered at server startup via Java ServiceLoader.
+ * New methods can be added by implementing IIntegrationMethodFactory.
+ * 
+ * Common methods:
+ *   euler       — Forward Euler, first-order accuracy, simple but less precise
+ *   rk2         — Runge-Kutta 2nd order, moderate accuracy and performance
+ *   rk31        — Runge-Kutta 3(1) embedded pair, supports adaptive step size
+ *   rkfehlberg  — Runge-Kutta-Fehlberg RKF45, adaptive order 4/5, high precision
  */
 message SimulationMethodItem {
-  // Internal method name (e.g., "Euler", "RK4", "RKF")
+  // Internal method name — machine-readable identifier used in RunSimulationRequest.
+  // Examples: "euler", "rk2", "rk3", "rk31", "rkmerson", "rkfehlberg"
   string name = 1;
-  // Display name for UI
+  
+  // Display name — human-readable title for UI presentation.
+  // Examples: "Euler", "Runge-Kutta 2nd order", "Runge-Kutta-Fehlberg (RKF45)"
   string title = 2;
 }

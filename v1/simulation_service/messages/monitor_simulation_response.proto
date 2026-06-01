@@ -9,12 +9,27 @@ option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
  * Streaming response with current simulation progress.
+ * 
+ * Sent periodically by the server as a simulation advances through its
+ * time range. Each message contains the simulation time boundaries and
+ * the current time position.
+ * 
+ * Progress percentage can be calculated as:
+ *   progress = (current_time - start_time) / (end_time - start_time)
+ * 
+ * The stream ends when the simulation reaches a terminal state.
+ * 
+ * Used by: UI progress bars, task tracking panels
  */
 message MonitorSimulationResponse {
-  // Original start time of simulation
+  // Original start time of simulation (t₀) — constant across all messages.
   double start_time = 1;
-  // Original end time of simulation
+  
+  // Original end time of simulation (tₙ) — constant across all messages.
   double end_time = 2;
-  // Current simulation time (progress indicator)
+  
+  // Current simulation time — advances from start_time toward end_time.
+  // This is the progress indicator. When current_time == end_time,
+  // the simulation has completed.
   double current_time = 3;
 }

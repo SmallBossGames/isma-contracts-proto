@@ -9,8 +9,15 @@ option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
  * Request to retrieve completed simulation results.
+ * 
+ * After a simulation completes, call this RPC to obtain the download URL
+ * for the result file. The actual file download uses HTTP (not gRPC)
+ * via the embedded Ktor server on a separate Unix socket.
+ * 
+ * The result file is in binary format and is consumed by the chart viewer
+ * for visualization of simulation output variables.
  */
 message GetSimulationResultRequest {
-  // ID returned from RunSimulation
+  // ID of the completed simulation, returned from RunSimulationResponse.
   int64 simulation_id = 1;
 }

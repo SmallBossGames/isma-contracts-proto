@@ -8,9 +8,19 @@ option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
- * Response containing download URL for simulation results.
+ * Response to GetSimulationResult request.
+ * 
+ * Contains a relative URL path for downloading the simulation result file
+ * via the embedded Ktor HTTP server. The download URL format is:
+ *   /simulation/{simulationId}/download
+ * 
+ * The actual binary file download is served by Ktor on a separate Unix socket,
+ * not via gRPC. gRPC is unsuitable for binary file transfer due to protobuf
+ * framing overhead and memory constraints.
  */
 message GetSimulationResultResponse {
-  // URL path for downloading the CSV file via HTTP
+  // HTTP download URL path for the result file.
+  // Full download: {ktor-server-host}/simulation/{simulationId}/download
+  // File format: Binary (consumed by chart viewer for visualization)
   string download_url = 2;
 }

@@ -9,11 +9,46 @@ option go_package = "github.com/isma/contracts/v1/compiler_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.compiler_service";
 
+/* 
+ * Request to validate LISMA source code without producing a compiled model.
+ * 
+ * Use this for quick syntax/semantic checks before committing to a full
+ * compilation. The translator runs in validation mode (populates IsmaErrorList)
+ * but does not store the model in memory.
+ * 
+ * Validation checks:
+ *   - Syntax errors: Invalid LISMA grammar, malformed statements, missing keywords
+ *   - Semantic errors: Undefined variables, type mismatches, structural issues
+ * 
+ * The request message is identical to CompileRequest — the distinction is
+ * made at the service layer (no model is stored in validation mode).
+ */
 message ValidateRequest {
+  // Full LISMA source code text to validate.
+  // Must not be empty or whitespace-only.
   string lisma_source_code = 1;
 }
 
+/* 
+ * Response to Validate request.
+ * 
+ * Contains error and warning details from the validation pass.
+ * Unlike CompileResponse, this never contains a compiled_model_id.
+ * 
+ * On successful validation:
+ *   - errors: Empty list
+ *   - warnings: May contain advisory messages
+ * 
+ * On failed validation:
+ *   - errors: List of CompilationError with line/column positions
+ *   - warnings: May contain advisory messages
+ */
 message ValidateResponse {
+  // List of validation errors with line and column positions.
+  // Empty if validation succeeded.
   repeated CompilationError errors = 1;
+  
+  // List of warning messages — advisory only.
+  // Warnings do not prevent simulation but indicate potential issues.
   repeated string warnings = 2;
 }

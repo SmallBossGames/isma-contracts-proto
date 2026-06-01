@@ -7,51 +7,117 @@ option go_package = "github.com/isma/contracts/v1/simulation_service";
 option java_multiple_files = true;
 option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
-/*
+/* 
  * Configuration for adaptive step size control.
- * When this message is present in RunSimulationRequest, adaptive step control is enabled.
+ * 
+ * When this message is present (non-null) in RunSimulationRequest,
+ * adaptive step size control is enabled. The integration method dynamically
+ * adjusts its step size to maintain the target accuracy.
+ * 
+ * Used by: euler, rk2, rk3, rk31, rkmerson, rkfehlberg
  */
 message AccuracyConfig {
-  // Target accuracy for adaptive methods
+  // Target accuracy value for adaptive step size control.
+  // Lower values produce more precise results at the cost of computation time.
+  // Typical range: 0.001 to 1.0 (default from UI: 0.1)
   double accuracy = 1;
 }
 
 /*
  * Configuration for stability control during simulation.
- * When this message is present in RunSimulationRequest, stability control is enabled.
+ * 
+ * When this message is present (non-null) in RunSimulationRequest,
+ * stability control is enabled. This prevents numerical divergence
+ * in Runge-Kutta methods by monitoring and constraining step sizes
+ * when instability is detected.
+ * 
+ * This is an empty message — presence alone enables the feature.
  */
 message StabilityConfig {
 }
 
 /*
  * Configuration for event detection during simulation.
- * When this message is present in RunSimulationRequest, event detection is enabled.
+ * 
+ * Event detection (zero-crossing detection) is used for hybrid systems
+ * with discrete state transitions. It detects when continuous variables
+ * cross zero, triggering state changes in the HSM model.
+ * 
+ * When this message is present (non-null) in RunSimulationRequest,
+ * event detection is enabled.
+ * 
+ * Used for: Hybrid systems with state transitions triggered by variable thresholds.
  */
 message EventDetectionConfig {
-  // Gamma parameter for event detection (controls step size near events)
+  // Gamma parameter for event detection — controls step size near events.
+  // Higher values make event detection more sensitive but may reduce performance.
+  // Typical range: 0.1 to 1.0 (default from UI: 0.8)
   double gamma = 1;
-  // Low bound for step size when event detection is active
+  
+  // Minimum step size for event detection — prevents step sizes from becoming
+  // too small during event search, which could cause infinite loops.
+  // Typical range: 0.0001 to 0.01 (default from UI: 0.001)
   double low_border = 2;
 }
 
 /*
- * Request to start a new simulation.
+ * Request to start a new numerical simulation.
+ * 
+ * The simulation solves a system of differential-algebraic equations
+ * defined by a pre-compiled HSM (Hybrid System Model). The model must
+ * first be compiled via LismaCompilerService.Compile.
+ * 
+ * Cauchy problem (initial value problem):
+ *   - start_time (t₀): When the simulation begins
+ *   - end_time (tₙ): When the simulation ends
+ *   - initial_step: Starting step size for the integration algorithm
+ * 
+ * Integration methods (query via ListSimulationMethods):
+ *   euler       — Forward Euler (first-order, simple but less accurate)
+ *   rk2         — Runge-Kutta 2nd order (second-order accuracy)
+ *   rk3         — Runge-Kutta 3rd order
+ *   rk31        — Runge-Kutta 3(1) embedded pair (adaptive)
+ *   rkmerson    — Merson's method (five-stage Runge-Kutta)
+ *   rkfehlberg  — Runge-Kutta-Fehlberg RKF45 (adaptive, order 4/5)
+ * 
+ * Optional configurations (presence = enabled):
+ *   - accuracy_config: Adaptive step size control
+ *   - stability_config: Stability control for RK methods
+ *   - event_detection: Zero-crossing detection for hybrid systems
  */
 message RunSimulationRequest {
-  // Simulation start time
+  // Simulation start time (t₀) — when the simulation begins.
+  // Typical value: 0.0
   double start_time = 1;
-  // Simulation end time
+  
+  // Simulation end time (tₙ) — when the simulation ends.
+  // Typical value: 10.0
   double end_time = 2;
-  // Initial integration step size
+  
+  // Initial integration step size — the starting step for the numerical solver.
+  // Adaptive methods may adjust this dynamically based on accuracy_config.
+  // Typical value: 0.1
   double initial_step = 3;
-  // Integration method name (e.g., "Euler", "RK4")
+  
+  // Integration method name — the numerical algorithm to use.
+  // Must match one of the names returned by ListSimulationMethods.
+  // Examples: "euler", "rk2", "rk3", "rk31", "rkmerson", "rkfehlberg"
   string method_name = 4;
-  // Accuracy configuration for adaptive step size control
+  
+  // Accuracy configuration for adaptive step size control.
+  // If present, enables adaptive step size control with the specified target accuracy.
   AccuracyConfig accuracy_config = 5;
-  // Stability configuration for stability control
+  
+  // Stability configuration for stability control.
+  // If present, enables stability control to prevent numerical divergence.
   StabilityConfig stability_config = 6;
-  // Event detection configuration
+  
+  // Event detection configuration for zero-crossing detection.
+  // If present, enables event detection for hybrid systems.
   EventDetectionConfig event_detection = 8;
-  // Compiled model ID (required) - obtained from LismaCompilerService.Compile
+  
+  // Compiled model ID — UUID of the pre-compiled HSM model.
+  // Obtained from LismaCompilerService.Compile response.
+  // Required — simulation cannot start without a valid model.
   string compiled_model_id = 9;
 }
