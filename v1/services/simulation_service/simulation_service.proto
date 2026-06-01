@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package ru.nstu.isma.contracts.simulation;
+package ru.nstu.isma.contracts.v1.simulation_service;
 
 import "v1/services/simulation_service/messages/cancel_simulation_request.proto";
 import "v1/services/simulation_service/messages/cancel_simulation_response.proto";
@@ -13,10 +13,10 @@ import "v1/services/simulation_service/messages/monitor_simulation_response.prot
 import "v1/services/simulation_service/messages/run_simulation_request.proto";
 import "v1/services/simulation_service/messages/run_simulation_response.proto";
 
-option csharp_namespace = "Isma.Contracts.Simulation";
-option go_package = "github.com/isma/contracts/simulation";
+option csharp_namespace = "Isma.Contracts.V1.SimulationService";
+option go_package = "github.com/isma/contracts/v1/simulation_service";
 option java_multiple_files = true;
-option java_package = "ru.nstu.isma.contracts.simulation";
+option java_package = "ru.nstu.isma.contracts.v1.simulation_service";
 
 /* 
  * ISMA Simulation Service
